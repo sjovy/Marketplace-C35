@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dynamic Advertisements</title>
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    .card {
+      margin-bottom: 20px;
+      border: none;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .card-footer {
+      background-color: #f8f9fa;
+    }
+    .contact-info {
+      cursor: pointer;
+      padding: 5px 10px;
+      background-color: #e9ecef;
+      border-radius: 5px;
+      transition: background-color 0.3s ease;
+    }
+    .contact-info:hover {
+      background-color: #ced4da;
+    }
+    .contact-info::before {
+      content: '👁 ';
+    }
+  </style>
+</head>
+<body>
+  <div class="container mt-5">
+    <h2 class="mb-4">Dynamic Advertisement List</h2>
+    <div class="mb-3">
+      <label for="filterTitle">Filter by Title:</label>
+      <input type="text" class="form-control" id="filterTitle" placeholder="Enter title">
+    </div>
+    <div id="advertisements" class="row">
+      <!-- Advertisements will be dynamically inserted here -->
+    </div>
+  </div>
+  
+  <!-- Modal for details -->
+  <div class="modal fade" id="detailsModal" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="detailsModalLabel">Advertisement Details</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <!-- Details will be inserted here -->
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  
+  <script>
+    // Enhanced sample data for advertisements
+    const advertisementsData = [
+      {
+        title: 'Vintage Bicycle',
+        description: 'Classic road bike from the 1980s, perfect for collectors.',
+        image: 'https://via.placeholder.com/150?text=Vintage+Bicycle',
+        contact: 'vintagebikes@example.com',
+        detailedDescription: 'This exquisite vintage bicycle is a true collectors item. Manufactured in 1985, it features a hand-crafted steel frame, original Campagnolo components, and period-correct leather saddle. The bike has been meticulously restored to its original glory, with all parts either original or period-correct replacements. Its not just a mode of transportation, but a piece of cycling history.',
+        condition: 'Excellent - Fully restored',
+        year: '1985',
+        brand: 'Colnago',
+        price: '$2,500'
+      },
+      {
+        title: 'Professional Camera',
+        description: 'High-end DSLR camera, ideal for professional photography.',
+        image: 'https://via.placeholder.com/150?text=Pro+Camera',
+        contact: 'photogear@example.com',
+        detailedDescription: 'Elevate your photography with this state-of-the-art DSLR camera. Boasting a 45.7-megapixel full-frame sensor, 4K video capabilities, and an advanced autofocus system, this camera is designed to meet the demands of professional photographers and videographers. Its rugged weather-sealed body ensures reliability in any shooting conditions.',
+        sensorType: 'Full-frame CMOS',
+        resolution: '45.7 megapixels',
+        isoRange: '64-25600 (expandable to 102400)',
+        shootingSpeed: 'Up to 9 fps',
+        price: '$3,299'
+      },
+      {
+        title: 'Handmade Pottery',
+        description: 'Unique ceramic vases and bowls, handcrafted by local artisans.',
+        image: 'https://via.placeholder.com/150?text=Pottery',
+        contact: 'artisancraft@example.com',
+        detailedDescription: 'Each piece in this collection of handmade pottery is a unique work of art. Crafted by skilled local artisans using traditional techniques, these vases and bowls showcase the beauty of natural clay and glazes. The collection includes a variety of sizes and shapes, perfect for both decorative use and practical purposes. Each item tells a story of craftsmanship and creativity.',
+        material: 'Locally-sourced clay',
+        technique: 'Wheel-thrown and hand-built',
+        glaze: 'Lead-free, food-safe glazes',
+        pieces: 'Set of 5 (3 vases, 2 bowls)',
+        price: '$250 for the set'
+      },
+      {
+        title: 'Organic Produce Box',
+        description: 'Weekly subscription of fresh, locally-sourced organic vegetables.',
+        image: 'https://via.placeholder.com/150?text=Organic+Box',
+        contact: 'farmfresh@example.com',
+        detailedDescription: 'Experience the freshness of farm-to-table produce with our organic vegetable box subscription. Each week, youll receive a carefully curated selection of seasonal, organic vegetables sourced from local farms. Our commitment to sustainable farming practices ensures that youre not only getting the healthiest produce but also supporting environmentally friendly agriculture.',
+        contents: 'Varies weekly based on seasonal availability',
+        farmLocations: 'Within 50 miles of city center',
+        certifications: 'USDA Organic, Non-GMO verified',
+        subscriptionOptions: 'Weekly, Bi-weekly, or Monthly',
+        price: '$35 per week'
+      },
+      {
+        title: 'Vintage Watch Collection',
+        description: 'Assortment of restored vintage watches from various eras.',
+        image: 'https://via.placeholder.com/150?text=Vintage+Watches',
+        contact: 'timekeepers@example.com',
+        detailedDescription: 'Step back in time with our curated collection of vintage timepieces. Each watch in this collection has been carefully selected for its historical significance, craftsmanship, and condition. From elegant dress watches of the 1950s to robust sports watches of the 1970s, this collection spans several decades of horological excellence. All watches have been professionally serviced and restored to ensure accurate timekeeping.',
+        eras: '1950s - 1980s',
+        brands: 'Omega, Rolex, Patek Philippe, and more',
+        movements: 'Mechanical (hand-wound and automatic)',
+        condition: 'Excellent - All fully serviced',
+        priceRange: '$1,000 - $15,000 per watch'
+      },
+      {
+        title: 'Coding Bootcamp',
+        description: 'Intensive 12-week program to learn full-stack web development.',
+        image: 'https://via.placeholder.com/150?text=Code+Bootcamp',
+        contact: 'learntocode@example.com',
+        detailedDescription: 'Launch your career in tech with our comprehensive coding bootcamp. Over the course of 12 intensive weeks, youll learn the fundamentals of full-stack web development, working with technologies like HTML, CSS, JavaScript, React, Node.js, and SQL. Our curriculum is designed by industry experts and updated regularly to reflect current market demands. With hands-on projects, code reviews, and career coaching, youll be well-prepared to start your journey as a web developer.',
+        duration: '12 weeks, full-time',
+        skillsCovered: 'HTML, CSS, JavaScript, React, Node.js, SQL',
+        projectsIncluded: '4 major projects, including a capstone project',
+        careerSupport: 'Resume building, interview prep, job search assistance',
+        price: '$12,000 (financing options available)'
+      }
+    ];
+
+    // Function to create an advertisement card
+    function createAdCard(ad) {
+      return `
+        <div class="card mb-4 col-md-4">
+          <img class="card-img-top" src="${ad.image}" alt="${ad.title}">
+          <div class="card-body">
+            <h5 class="card-title">${ad.title}</h5>
+            <p class="card-text">${ad.description}</p>
+            <p class="card-text contact-info" data-contact="${ad.contact}">Contact: ***</p>
+          </div>
+          <div class="card-footer text-center">
+            <button class="btn btn-info btn-block details-btn" data-ad-index="${advertisementsData.indexOf(ad)}">Details</button>
+          </div>
+        </div>
+      `;
+    }
+
+    // Function to display advertisements
+    function displayAdvertisements(ads) {
+      const adContainer = document.getElementById('advertisements');
+      adContainer.innerHTML = ads.map(ad => createAdCard(ad)).join('');
+      
+      // Add event listeners for contact info toggle and details button
+      document.querySelectorAll('.contact-info').forEach(el => {
+        el.addEventListener('click', toggleContactInfo);
+      });
+      document.querySelectorAll('.details-btn').forEach(el => {
+        el.addEventListener('click', showDetails);
+      });
+    }
+
+    // Function to filter advertisements
+    function filterAdvertisements() {
+      const filterText = document.getElementById('filterTitle').value.toLowerCase();
+      const filteredAds = advertisementsData.filter(ad => 
+        ad.title.toLowerCase().includes(filterText)
+      );
+      displayAdvertisements(filteredAds);
+    }
+
+    // Function to toggle contact information
+    function toggleContactInfo(event) {
+      const contactElement = event.target;
+      const contact = contactElement.dataset.contact;
+      if (contactElement.textContent.includes('***')) {
+        contactElement.textContent = `Contact: ${contact}`;
+        contactElement.style.backgroundColor = '#d4edda';
+      } else {
+        contactElement.textContent = 'Contact: ***';
+        contactElement.style.backgroundColor = '#e9ecef';
+      }
+    }
+
+    // Updated function to show details
+    function showDetails(event) {
+      const adIndex = event.target.dataset.adIndex;
+      const ad = advertisementsData[adIndex];
+      
+      const modalBody = document.querySelector('#detailsModal .modal-body');
+      modalBody.innerHTML = `
+        <h3>${ad.title}</h3>
+        <img src="${ad.image}" alt="${ad.title}" class="img-fluid mb-3">
+        <p><strong>Description:</strong> ${ad.detailedDescription}</p>
+        <hr>
+        <h5>Additional Details:</h5>
+        <ul>
+          ${Object.entries(ad)
+            .filter(([key]) => !['title', 'description', 'image', 'contact', 'detailedDescription'].includes(key))
+            .map(([key, value]) => `<li><strong>${key.charAt(0).toUpperCase() + key.slice(1)}:</strong> ${value}</li>`)
+            .join('')}
+        </ul>
+        <hr>
+        <p><strong>Contact:</strong> ${ad.contact}</p>
+      `;
+      
+      $('#detailsModal').modal('show');
+    }
+
+    // Initial display of advertisements
+    displayAdvertisements(advertisementsData);
+
+    // Add event listener for filter input
+    document.getElementById('filterTitle').addEventListener('input', filterAdvertisements);
+  </script>
+</body>
+</html>
